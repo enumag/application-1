@@ -22,6 +22,10 @@ use Nette;
  */
 class Application extends Nette\Object
 {
+	const CATCH_NONE = 0;
+	const CATCH_ALL = 1;
+	const CATCH_SMART = 2;
+
 	/** @var int */
 	public static $maxLoop = 20;
 
@@ -90,7 +94,9 @@ class Application extends Nette\Object
 
 		} catch (\Exception $e) {
 			$this->onError($this, $e);
-			if ($this->catchExceptions && $this->errorPresenter) {
+
+			// Cast $this->catchExceptions to int for compatibility.
+			if (((int) $this->catchExceptions === self::CATCH_ALL || ($this->catchExceptions === self::CATCH_SMART && $e instanceof BadRequestException)) && $this->errorPresenter) {
 				try {
 					$this->processException($e);
 					$this->onShutdown($this, $e);

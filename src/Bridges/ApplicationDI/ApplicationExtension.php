@@ -36,7 +36,7 @@ class ApplicationExtension extends Nette\DI\CompilerExtension
 	{
 		$this->defaults['scanDirs'] = (array) $scanDirs;
 		$this->defaults['scanComposer'] = class_exists('Composer\Autoload\ClassLoader');
-		$this->defaults['catchExceptions'] = !$debugMode;
+		$this->defaults['catchExceptions'] = $debugMode ? Nette\Application\Application::CATCH_NONE : Nette\Application\Application::CATCH_ALL;
 		$this->debugMode = $debugMode;
 	}
 
@@ -49,7 +49,7 @@ class ApplicationExtension extends Nette\DI\CompilerExtension
 
 		$application = $container->addDefinition($this->prefix('application'))
 			->setClass('Nette\Application\Application')
-			->addSetup('$catchExceptions', array($config['catchExceptions']))
+			->addSetup('$catchExceptions', array($config['catchExceptions'] === 'smart' ? Nette\Application\Application::CATCH_SMART : $config['catchExceptions']))
 			->addSetup('$errorPresenter', array($config['errorPresenter']));
 
 		if ($config['debugger']) {
