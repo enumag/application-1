@@ -120,13 +120,6 @@ class Application extends Nette\Object
 			throw BadRequestException::fromRequest($request, 'Invalid request. Presenter is not achievable.');
 		}
 
-		try {
-			$name = $request->getPresenterName();
-			$this->presenterFactory->getPresenterClass($name);
-		} catch (InvalidPresenterException $e) {
-			throw BadRequestException::fromRequest($request, $e->getMessage(), 0, $e);
-		}
-
 		return $request;
 	}
 
@@ -143,7 +136,11 @@ class Application extends Nette\Object
 		$this->requests[] = $request;
 		$this->onRequest($this, $request);
 
-		$this->presenter = $this->presenterFactory->createPresenter($request->getPresenterName());
+		try {
+			$this->presenter = $this->presenterFactory->createPresenter($request->getPresenterName());
+		} catch (InvalidPresenterException $e) {
+			throw new BadRequestException($e->getMessage(), 0, $e);
+		}
 		$this->onPresenter($this, $this->presenter);
 		$response = $this->presenter->run($request);
 
